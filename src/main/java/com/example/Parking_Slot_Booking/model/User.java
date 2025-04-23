@@ -1,6 +1,9 @@
 package com.example.Parking_Slot_Booking.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class User {
@@ -14,8 +17,13 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference(value = "user-parkSlot")
     private ParkSlot parkSlot;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "user-bookings")
+    private List<Bookings> bookingss;
 
     User(){
         super();

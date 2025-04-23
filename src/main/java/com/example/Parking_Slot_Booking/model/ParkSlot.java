@@ -13,7 +13,9 @@ public class ParkSlot {
 
     private boolean isAvailable = true;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = false)
+    @JsonBackReference(value = "user-parkSlot")
     private User user;
 
     @OneToOne
@@ -23,14 +25,15 @@ public class ParkSlot {
     @JsonBackReference(value = "mall-slot")
     private Mall mall;
 
-    ParkSlot(){
+    public ParkSlot(){
         super();
     }
-    public ParkSlot(long id, boolean isAvailable, User user, Shop shop) {
+    public ParkSlot(long id, boolean isAvailable, User user, Shop shop, Mall mall) {
         this.id = id;
         this.isAvailable = isAvailable;
         this.user = user;
         this.shop = shop;
+        this.mall = mall;
     }
 
     public long getId() {
@@ -65,4 +68,11 @@ public class ParkSlot {
         this.shop = shop;
     }
 
+    public Mall getMall() {
+        return mall;
+    }
+
+    public void setMall(Mall mall) {
+        this.mall = mall;
+    }
 }

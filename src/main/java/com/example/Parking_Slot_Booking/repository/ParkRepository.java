@@ -17,4 +17,6 @@ public interface ParkRepository extends JpaRepository<ParkSlot, Long> {
     List<ParkSlot> findByMallIdAndIsAvailableTrue(long id);
 
     List<ParkSlot> findByShopIdAndIsAvailableTrue(long id);
+
+    ParkSlot findByUserId(long id);
 }

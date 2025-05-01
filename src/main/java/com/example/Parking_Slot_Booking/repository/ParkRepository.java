@@ -1,10 +1,8 @@
 package com.example.Parking_Slot_Booking.repository;
 
-import com.example.Parking_Slot_Booking.model.Mall;
 import com.example.Parking_Slot_Booking.model.ParkSlot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,4 +17,5 @@ public interface ParkRepository extends JpaRepository<ParkSlot, Long> {
     List<ParkSlot> findByShopIdAndIsAvailableTrue(long id);
 
     ParkSlot findByUserId(long id);
+
 }

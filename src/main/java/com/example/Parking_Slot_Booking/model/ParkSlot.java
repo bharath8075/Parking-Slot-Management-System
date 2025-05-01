@@ -14,7 +14,7 @@ public class ParkSlot {
     private boolean isAvailable = true;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = false)
+    @JoinColumn(name = "user_id")
     @JsonBackReference(value = "user-parkSlot")
     private User user;
 
@@ -24,6 +24,8 @@ public class ParkSlot {
     @ManyToOne
     @JsonBackReference(value = "mall-slot")
     private Mall mall;
+
+
 
     public ParkSlot(){
         super();

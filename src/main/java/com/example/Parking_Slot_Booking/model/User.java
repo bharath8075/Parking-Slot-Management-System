@@ -17,6 +17,10 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    private String password;
+
+    private String role;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference(value = "user-parkSlot")
     private ParkSlot parkSlot;
@@ -25,13 +29,18 @@ public class User {
     @JsonManagedReference(value = "user-bookings")
     private List<Bookings> bookingss;
 
-    User(){
-        super();
-    }
-    public User(long id, String userName, String email) {
+    public User(long id, String userName, String email, String password, String role, ParkSlot parkSlot, List<Bookings> bookingss) {
         this.id = id;
         this.userName = userName;
         this.email = email;
+        this.password = password;
+        this.role = role;
+        this.parkSlot = parkSlot;
+        this.bookingss = bookingss;
+    }
+
+    public User() {
+        super();
     }
 
     public long getId() {
@@ -56,5 +65,37 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public ParkSlot getParkSlot() {
+        return parkSlot;
+    }
+
+    public void setParkSlot(ParkSlot parkSlot) {
+        this.parkSlot = parkSlot;
+    }
+
+    public List<Bookings> getBookingss() {
+        return bookingss;
+    }
+
+    public void setBookingss(List<Bookings> bookingss) {
+        this.bookingss = bookingss;
     }
 }

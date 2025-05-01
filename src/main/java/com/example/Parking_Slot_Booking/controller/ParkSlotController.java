@@ -41,4 +41,14 @@ public class ParkSlotController {
 
         return ResponseEntity.ok(parkService.getBookingRecords(userId));
     }
+
+    @GetMapping("/available-slots")
+    public ResponseEntity<?> showAvailableSlots(){
+        return parkService.showAvailableSlots();
+    }
+
+    @PutMapping("/cancel-booking/{slotId}")
+    public ResponseEntity<?> cancelBooking(@RequestHeader("Authorization") String token, long slotId){
+        return parkService.cancelBooking(token, slotId);
+    }
 }

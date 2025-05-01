@@ -1,11 +1,16 @@
 package com.example.Parking_Slot_Booking.service;
 
 import com.example.Parking_Slot_Booking.dto.InfoDto;
+import com.example.Parking_Slot_Booking.dto.RecordsDto;
+import com.example.Parking_Slot_Booking.dto.SlotInfoDto;
 import com.example.Parking_Slot_Booking.exception.UserNotBookedException;
 import com.example.Parking_Slot_Booking.exception.UserNotFoundException;
 import com.example.Parking_Slot_Booking.model.*;
 import com.example.Parking_Slot_Booking.repository.*;
+import com.example.Parking_Slot_Booking.security.JwtUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,6 +35,9 @@ public class ParkSlotService {
 
     @Autowired
     private BookingsRepository bookingsRepo;
+
+    @Autowired
+    private JwtUtility jwtUtil;
 
     public List<ParkSlot> showSlots(String name) {
         List<ParkSlot> availableSlots = new ArrayList<>();
@@ -98,7 +106,6 @@ public class ParkSlotService {
             if(!ps.isAvailable()) {
                String shopName = ps.getShop() != null ? ps.getShop().getName() : null;
                String mallName = ps.getMall() != null ? ps.getMall().getName() : null;
-
                 InfoDto infoDto = new InfoDto(shopName, mallName, true);
                responseDto.add(infoDto);
             }
@@ -111,7 +118,7 @@ public class ParkSlotService {
         return responseDto;
     }
 
-    public List<Bookings> getBookingRecords(long userId) {
+    public List<RecordsDto> getBookingRecords(long userId) {
 
         Optional<User> optionalUser = userRepo.findById(userId);
         if(optionalUser.isEmpty()){
@@ -120,12 +127,64 @@ public class ParkSlotService {
         User user = optionalUser.get();
         List<Bookings> allBookings = bookingsRepo.findAll();
 
-        List<Bookings> userBookings = new ArrayList<>();
+        List<RecordsDto> userBookings = new ArrayList<>();
+
         for(Bookings bookings : allBookings){
             if (bookings.getUser().getId() == userId){
-                userBookings.add(bookings);
+
+                Long slotId = bookings.getParkSlotId();
+                Optional<ParkSlot> optionalParkSlotarkSlot = parkRepo.findById(slotId);
+
+                String shop = optionalParkSlotarkSlot.get().getShop().getName();
+
+                RecordsDto recordsDto = new RecordsDto(slotId, shop);
+                userBookings.add(recordsDto);
             }
         }
         return userBookings;
+    }
+
+    public ResponseEntity<?> showAvailableSlots() {
+        List<SlotInfoDto> availableSlots = new ArrayList<>();
+        List<ParkSlot> allslots = parkRepo.findAll();
+
+        for(ParkSlot slot : allslots){
+            if(slot.isAvailable()){
+                SlotInfoDto slotInfo = new SlotInfoDto();
+                slotInfo.setShopName(slot.getShop().getName());
+                slotInfo.setMallName(slot.getMall().getName());
+                slotInfo.setSlotStatus("Available");
+
+                availableSlots.add(slotInfo);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Currently slots are not available");
+        }
+
+        return ResponseEntity.ok(availableSlots);
+    }
+
+    public ResponseEntity<?> cancelBooking(String token, long slotId) {
+        String email = jwtUtil.extractUser(token);
+
+        Optional<ParkSlot> optCurrentSlot = parkRepo.findById(slotId);
+
+        Optional<User> optUser = userRepo.findById(optCurrentSlot.get().getUser().getId());
+
+        if(!optUser.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Enter a valid slot ID");
+        }
+        User user = optUser.get();
+
+        if(!user.getEmail().equals(email)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Slot ID - "+ slotId + " is not booked by "+ user.getUserName());
+        }
+
+        ParkSlot currentSlot = optCurrentSlot.get();
+        currentSlot.setUser(null);
+        currentSlot.setAvailable(true);
+
+        parkRepo.save(currentSlot);
+
+        return ResponseEntity.ok("Slot cancelled succesfully");
     }
 }

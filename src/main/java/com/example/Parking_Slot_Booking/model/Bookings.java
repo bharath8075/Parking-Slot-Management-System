@@ -10,6 +10,8 @@ public class Bookings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     private long id;
+
+
     private long parkSlotId;
 
     @ManyToOne(fetch = FetchType.LAZY)

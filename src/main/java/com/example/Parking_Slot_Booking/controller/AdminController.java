@@ -23,7 +23,12 @@ public class AdminController {
         if(slotInfo.getMallName().isEmpty() || slotInfo.getShopName().isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Both Shop name and mall name are Required");
         }
-        return  adminService.addSlot(slotInfo);
+        try {
+            adminService.addSlot(slotInfo);
+        } catch (Exception e){
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        return  ResponseEntity.ok("Slot added successful!!");
     }
 
     @DeleteMapping("delete-slot/{slotId}")
@@ -33,18 +38,25 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Slot ID can not be null");
         }
 
-        return adminService.deleteSlot(slotId);
+        try {
+            adminService.deleteSlot(slotId);
+            return ResponseEntity.ok("Slot deleted!!");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+
     }
 
     //view slot was unnecessary => created by mistake or carelessness
     @GetMapping("view-all-slot")
     public ResponseEntity<List<SlotInfoDto>> viewAllSlot(){
-        return adminService.viewAllSlot();
+        return ResponseEntity.ok(adminService.viewAllSlot());
     }
 
     @GetMapping("view-all-bookings")
     public ResponseEntity<List<BookingsInfoDto>> viewAllBookings(){
-        return adminService.viewAllBookings();
+        return ResponseEntity.ok(adminService.viewAllBookings());
     }
 
 }

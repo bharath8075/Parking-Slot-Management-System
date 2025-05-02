@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,12 +36,13 @@ public class AdminService {
     @Autowired
     private BookingsRepository bookRepo;
 
-    public ResponseEntity<?> addSlot(AddSlotDto slotInfo) {
+    public String addSlot(AddSlotDto slotInfo) {
         Mall mall = mallRepo.findByName(slotInfo.getMallName());
         Shop shop = shopRepo.findByName(slotInfo.getShopName());
 
         if (mall == null || shop == null){
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Shop or Mall doesn't exist");
+            throw new RuntimeException("Mall or Shop doesn't exist");
+
         }
 
         ParkSlot newSlot = new ParkSlot();
@@ -50,21 +52,20 @@ public class AdminService {
         newSlot.setUser(null);
 
         parkRepo.save(newSlot);
-        return ResponseEntity.ok("Slot added Successfully!!");
+        return "Slot added Successfully!!";
     }
 
-    public ResponseEntity<?> deleteSlot(Long slotId) {
+    @Transactional
+    public void deleteSlot(Long slotId) {
         Optional<ParkSlot> optSlot = parkRepo.findById(slotId);
 
         if(optSlot.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Slot does not exist!!");
+            throw new RuntimeException("Slot ID not found");
         }
-        parkRepo.deleteById(slotId);
-
-        return ResponseEntity.ok("Slot successfully deleted!");
+        parkRepo.deleteSlotById(slotId);
     }
 
-    public ResponseEntity<List<SlotInfoDto>> viewAllSlot() {
+    public List<SlotInfoDto> viewAllSlot() {
         List<SlotInfoDto> slotInfos = new ArrayList<>();
 
         List<ParkSlot> slots = parkRepo.findAll();
@@ -83,10 +84,10 @@ public class AdminService {
             slotInfos.add(slot);
         }
 
-        return ResponseEntity.ok(slotInfos);
+        return slotInfos;
     }
 
-    public ResponseEntity<List<BookingsInfoDto>> viewAllBookings() {
+    public List<BookingsInfoDto> viewAllBookings() {
         List<Bookings> allBookings = bookRepo.findAll();
         List<BookingsInfoDto> allBookingsResponse = new ArrayList<>();
 
@@ -101,6 +102,6 @@ public class AdminService {
             allBookingsResponse.add(bookingsInfoDto);
         }
 
-        return ResponseEntity.ok(allBookingsResponse);
+        return allBookingsResponse;
     }
 }

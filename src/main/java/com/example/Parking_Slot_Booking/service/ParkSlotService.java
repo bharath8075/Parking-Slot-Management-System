@@ -1,5 +1,6 @@
 package com.example.Parking_Slot_Booking.service;
 
+import com.example.Parking_Slot_Booking.dto.BookSlotDto;
 import com.example.Parking_Slot_Booking.dto.InfoDto;
 import com.example.Parking_Slot_Booking.dto.RecordsDto;
 import com.example.Parking_Slot_Booking.dto.SlotInfoDto;
@@ -59,13 +60,13 @@ public class ParkSlotService {
     }
 
 
-    public String bookSlot(long userId, long slotId) {
-        Optional<User> optionalUser = userRepo.findById(userId);
+    public String bookSlot(long userId, BookSlotDto bookingInfo) {
+       /* Optional<User> optionalUser = userRepo.findById(userId);
         if(optionalUser.isEmpty()){
             return "User not found";
         }
 
-        Optional<ParkSlot> optionalSlot = parkRepo.findById(slotId);
+        Optional<ParkSlot> optionalSlot = parkRepo.findById(bookingInfo.getSlotId());
         if(optionalSlot.isPresent()){
             ParkSlot slot = optionalSlot.get();
             Bookings book = new Bookings();
@@ -83,7 +84,25 @@ public class ParkSlotService {
                 return "slot already booked";
             }
         }
-        return "slot not found";
+        return "slot not found";*/
+        Optional<User> optUser = userRepo.findById(userId);
+        if(optUser.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+
+        Optional<ParkSlot> optSlot = parkRepo.findById(bookingInfo.getSlotId());
+        if(optSlot.isEmpty()){
+            throw new RuntimeException("Invalid slot Id!!");
+        }
+
+        List<Bookings> bookingsExist = bookingsRepo.findBookingConflicts(bookingInfo.getSlotId(),
+                bookingInfo.getStartTime(), bookingInfo.getEndTime());
+        if(!bookingsExist.isEmpty()){
+            throw new RuntimeException("Slot is already booked");
+        }
+
+        //to be continued
+
     }
 
     public List<InfoDto> getInfo(long userId) {
@@ -144,12 +163,12 @@ public class ParkSlotService {
         return userBookings;
     }
 
-    public ResponseEntity<?> showAvailableSlots() {
+    public List<SlotInfoDto> showAvailableSlots() {
         List<SlotInfoDto> availableSlots = new ArrayList<>();
         List<ParkSlot> allslots = parkRepo.findAll();
 
         for(ParkSlot slot : allslots){
-            if(slot.isAvailable()){
+            if(slot.isAvailable() == true){
                 SlotInfoDto slotInfo = new SlotInfoDto();
                 slotInfo.setShopName(slot.getShop().getName());
                 slotInfo.setMallName(slot.getMall().getName());
@@ -157,13 +176,14 @@ public class ParkSlotService {
 
                 availableSlots.add(slotInfo);
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Currently slots are not available");
         }
-
-        return ResponseEntity.ok(availableSlots);
+        if(availableSlots.isEmpty()){
+            throw new RuntimeException("Currently slots are not available");
+        }
+        return availableSlots;
     }
 
-    public ResponseEntity<?> cancelBooking(String token, long slotId) {
+    public String cancelBooking(String token, long slotId) {
         String email = jwtUtil.extractUser(token);
 
         Optional<ParkSlot> optCurrentSlot = parkRepo.findById(slotId);
@@ -171,12 +191,12 @@ public class ParkSlotService {
         Optional<User> optUser = userRepo.findById(optCurrentSlot.get().getUser().getId());
 
         if(!optUser.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Enter a valid slot ID");
+           throw new RuntimeException("Enter a valid slot ID");
         }
         User user = optUser.get();
 
         if(!user.getEmail().equals(email)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Slot ID - "+ slotId + " is not booked by "+ user.getUserName());
+            throw new RuntimeException("Slot ID - "+ slotId + " is not booked by "+ user.getUserName());
         }
 
         ParkSlot currentSlot = optCurrentSlot.get();
@@ -185,6 +205,6 @@ public class ParkSlotService {
 
         parkRepo.save(currentSlot);
 
-        return ResponseEntity.ok("Slot cancelled succesfully");
+        return "Slot cancelled succesfully";
     }
 }

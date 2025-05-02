@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                  .authorizeHttpRequests(req ->
                          req.antMatchers("/auth/login", "/auth/register").permitAll()
+                                 .antMatchers("/admin/delete-slot/*").hasRole("SUPER_ADMIN")
                                  .antMatchers("/admin/**").hasRole("ADMIN")
                                  .antMatchers("/parking/**").hasAnyRole("USER", "ADMIN")
                                  .anyRequest().authenticated()

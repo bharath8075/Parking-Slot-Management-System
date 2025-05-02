@@ -3,6 +3,7 @@ package com.example.Parking_Slot_Booking.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
+import java.time.LocalTime;
 
 @Entity
 public class Bookings {
@@ -10,8 +11,6 @@ public class Bookings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     private long id;
-
-
     private long parkSlotId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -19,10 +18,15 @@ public class Bookings {
     @JsonBackReference("user-bookings")
     private User user;
 
-    public Bookings(long id, long parkSlotId, User user){
+    private LocalTime startTime;
+    private LocalTime endTime;
+
+    public Bookings(long id, long parkSlotId, User user, LocalTime startTime, LocalTime endTime) {
         this.id = id;
         this.parkSlotId = parkSlotId;
         this.user = user;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     public Bookings(){
@@ -51,5 +55,21 @@ public class Bookings {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 }

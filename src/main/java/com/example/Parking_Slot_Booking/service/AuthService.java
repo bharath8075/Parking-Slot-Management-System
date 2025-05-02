@@ -1,6 +1,7 @@
 package com.example.Parking_Slot_Booking.service;
 
 import com.example.Parking_Slot_Booking.dto.UserDto;
+import com.example.Parking_Slot_Booking.exception.PasswordShouldNotEmpty;
 import com.example.Parking_Slot_Booking.exception.UserEmailAlreadyInUse;
 import com.example.Parking_Slot_Booking.model.User;
 import com.example.Parking_Slot_Booking.repository.UserRepository;
@@ -21,13 +22,13 @@ public class AuthService {
     @Autowired
     private UserRepository userRepo;
 
-    public ResponseEntity<?> registerUser(UserDto user) {
+    public String registerUser(UserDto user) {
         Optional<User> optionalUser = userRepo.findByEmail(user.getEmail());
         if(optionalUser.isPresent()){
             throw new UserEmailAlreadyInUse("Email has already registered");
         }
         if(user.getPassword() == null || user.getPassword().trim().isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must not be empty!!");
+            throw new PasswordShouldNotEmpty("Password must not be empty!!");
 
         }
 
@@ -37,6 +38,6 @@ public class AuthService {
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         newUser.setRole("USER");
         userRepo.save(newUser);
-        return ResponseEntity.ok("User registered sucessfully!!");
+        return "User registered sucessfully!!";
     }
 }

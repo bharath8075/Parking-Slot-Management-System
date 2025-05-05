@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -93,6 +94,14 @@ public class ParkSlotService {
         Optional<ParkSlot> optSlot = parkRepo.findById(bookingInfo.getSlotId());
         if(optSlot.isEmpty()){
             throw new RuntimeException("Invalid slot Id!!");
+        }
+
+        LocalDateTime presentTime = LocalDateTime.now();
+        if(bookingInfo.getStartTime().isBefore(presentTime) || bookingInfo.getEndTime().isBefore(presentTime)){
+            throw new RuntimeException("Invalid Time (Make the start time or End time in future)");
+        }
+        if(bookingInfo.getStartTime().isAfter(bookingInfo.getEndTime()) || bookingInfo.getEndTime().isBefore(bookingInfo.getStartTime())){
+            throw new RuntimeException("iInvalid time input");
         }
 
         List<Bookings> bookingsExist = bookingsRepo.findBookingConflicts(bookingInfo.getSlotId(),
@@ -217,5 +226,19 @@ public class ParkSlotService {
         parkRepo.save(currentSlot);
 
         return "Slot cancelled succesfully";
+    }
+
+    public String showAvailableSlot(BookSlotDto bookingInfo) {
+
+        List<Bookings> allBookings = bookingsRepo.findByExpiredFalse();
+
+        for(Bookings book : allBookings){
+            if(bookingInfo.getSlotId().equals(book.getParkSlotId())){
+                if(bookingInfo.getStartTime().equals(book.getStartTime())  || bookingInfo.getEndTime().equals(book.getEndTime())){
+                    throw new RuntimeException("Slot is unnavailable");
+                }
+            }
+        }
+        return "Slot is available!!";
     }
 }

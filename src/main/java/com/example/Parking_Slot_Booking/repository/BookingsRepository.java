@@ -30,5 +30,5 @@ public interface BookingsRepository extends JpaRepository<Bookings, Long> {
     @Query(value = "SELECT * FROM bookings WHERE expired = false", nativeQuery = true)
     List<Bookings> findByNotExpired();
 
-//    List<Bookings> findByExpiredFalse();
+    List<Bookings> findByExpiredFalse();
 }

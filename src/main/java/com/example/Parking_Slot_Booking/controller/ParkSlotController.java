@@ -71,4 +71,15 @@ public class ParkSlotController {
         }
         return ResponseEntity.ok("Slot cancelled!!");
     }
+
+    @GetMapping("/show-available-slots")
+    public ResponseEntity<?> showAvailableStatus(@RequestBody BookSlotDto bookingInfo){
+        String message = null;
+        try {
+            message = parkService.showAvailableSlot(bookingInfo);
+        } catch ( Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        return ResponseEntity.ok(message);
+    }
 }

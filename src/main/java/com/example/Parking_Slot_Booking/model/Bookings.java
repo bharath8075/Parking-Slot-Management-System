@@ -3,7 +3,7 @@ package com.example.Parking_Slot_Booking.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 public class Bookings {
@@ -18,15 +18,18 @@ public class Bookings {
     @JsonBackReference("user-bookings")
     private User user;
 
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
-    public Bookings(long id, long parkSlotId, User user, LocalTime startTime, LocalTime endTime) {
+    private boolean expired;
+
+    public Bookings(long id, long parkSlotId, User user, LocalDateTime startTime, LocalDateTime endTime, boolean expired) {
         this.id = id;
         this.parkSlotId = parkSlotId;
         this.user = user;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.expired = expired;
     }
 
     public Bookings(){
@@ -57,19 +60,27 @@ public class Bookings {
         this.user = user;
     }
 
-    public LocalTime getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalTime startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalTime getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalTime endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 }

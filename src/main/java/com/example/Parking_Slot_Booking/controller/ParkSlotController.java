@@ -27,7 +27,12 @@ public class ParkSlotController {
     @PostMapping("/bookslot/{userId}")
     public ResponseEntity<String> bookSlot(@PathVariable long userId, @RequestBody BookSlotDto bookingInfo){
 
-        return ResponseEntity.ok(parkService.bookSlot(userId, bookingInfo));
+        try {
+            String message = parkService.bookSlot(userId, bookingInfo);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/get-info/{userId}")

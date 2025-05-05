@@ -101,8 +101,19 @@ public class ParkSlotService {
             throw new RuntimeException("Slot is already booked");
         }
 
-        //to be continued
+//        ParkSlot slot = optSlot.get();
+//        slot.setUser(optUser.get());
+//        slot.setAvailable(false);
+//        parkRepo.save(slot);
 
+        Bookings newBook = new Bookings();
+        newBook.setParkSlotId(bookingInfo.getSlotId());
+        newBook.setExpired(false);
+        newBook.setStartTime(bookingInfo.getStartTime());
+        newBook.setEndTime(bookingInfo.getEndTime());
+        newBook.setUser(optUser.get());
+        bookingsRepo.save(newBook);
+        return "Slot Booked Successfully";
     }
 
     public List<InfoDto> getInfo(long userId) {
